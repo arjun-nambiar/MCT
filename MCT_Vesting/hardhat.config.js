@@ -104,7 +104,7 @@ function bscMainnetNetworkConfig() {
 function bscTestnetNetworkConfig() {
   let url = "https://data-seed-prebsc-1-s1.binance.org:8545/";
   let accountPrivateKey =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
+    "0x8292587a832585c31bd2e7ad1984bd3c09967ed7841fd49837008e837c96e1b5";
   if (process.env.BSC_TESTNET_ENDPOINT) {
     url = `${process.env.BSC_TESTNET_ENDPOINT}`;
   }

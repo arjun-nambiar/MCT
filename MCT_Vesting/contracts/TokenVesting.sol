@@ -32,6 +32,28 @@ contract MCTVesting is Ownable, ReentrancyGuard{
         uint256  released;
     }
 
+    enum Roles {
+        PrivatePublicSale,
+        Tresuary,
+        Ecosystem,
+        MarketingAndPartner,
+        Team
+    }
+
+    // keeping track of beneficiary in different roles
+    mapping(address => bool) private _privatePublicSaleBeneficiaries;
+    mapping(address => bool) private _tresuaryBeneficiaries;
+    mapping(address => bool) private _ecosyatemBeneficiaries;
+    mapping(address => bool) private _marketingAndPartnerBeneficiaries;
+    mapping(address => bool) private _teamBeneficiaries;
+
+    /// @notice tracking beneficiary count
+    uint256 public privatePublicSaleBeneficiariesCount = 0;
+    uint256 public tresuaryBeneficiariesCount = 0;
+    uint256 public ecosyatemBeneficiariesCount = 0;
+    uint256 public marketingAndPartnerBeneficiariesCount = 0;
+    uint256 public teamBeneficiariesCount = 0;
+
     // address of the ERC20 token
     IERC20 immutable private _token;
 
@@ -44,6 +66,7 @@ contract MCTVesting is Ownable, ReentrancyGuard{
         uint256 duration,
         uint256 amountTotal
     );
+
 
     // initialize vesting schedule ID
     bytes32[] private vestingSchedulesIds;
@@ -111,6 +134,7 @@ contract MCTVesting is Ownable, ReentrancyGuard{
         return keccak256(abi.encodePacked(holder));
     }
 
+
     /**
     * @notice Creates a new vesting schedule for a beneficiary.
     * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
@@ -120,6 +144,7 @@ contract MCTVesting is Ownable, ReentrancyGuard{
     * @param _amountTotal total amount of tokens to be released at the end of the vesting
     */
     function createVestingSchedule(
+        Roles r,
         address _beneficiary,
         uint256 _start,
         uint256 _cliff,
@@ -144,6 +169,7 @@ contract MCTVesting is Ownable, ReentrancyGuard{
             _amountTotal,
             0
         );
+        addBeneficiary(_beneficiary, r);
         vestingSchedulesTotalAmount = vestingSchedulesTotalAmount.add(_amountTotal);
         vestingSchedulesIds.push(vestingScheduleId);
 
@@ -159,7 +185,27 @@ contract MCTVesting is Ownable, ReentrancyGuard{
         
     }
 
-   
+    function addBeneficiary(address _address, Roles r) public onlyOwner {
+        if (r == Roles.PrivatePublicSale) {
+            privatePublicSaleBeneficiariesCount++;
+            _privatePublicSaleBeneficiaries[_address] = true;
+        } else if (r == Roles.Tresuary) {
+            tresuaryBeneficiariesCount++;
+            _tresuaryBeneficiaries[_address] = true;
+        } else if (r == Roles.Ecosystem) {
+            ecosyatemBeneficiariesCount++;
+            _ecosyatemBeneficiaries[_address] = true;
+        } else if (r == Roles.MarketingAndPartner) {
+            marketingAndPartnerBeneficiariesCount++;
+            _marketingAndPartnerBeneficiaries[_address] = true;
+        } else if (r == Roles.Team) {
+            teamBeneficiariesCount++;
+            _teamBeneficiaries[_address] = true;
+        } 
+        else {
+            revert("You specefied invalid Role");
+        }
+    }
 
     /**
     * @notice Withdraw the specified amount if possible.
